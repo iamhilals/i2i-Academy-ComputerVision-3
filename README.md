@@ -1,1 +1,1 @@
-# i2i-Academy-ComputerVision-3
+Bu projede mediapipe kullanarak kamera görüntüsünde parmak saydırma, ellerini özel bir biçime soktuğumda buna özel gelen bir resim, aynı zamanda bilgisayarın sesini ayarlayabildiğim bir özellik oluşturulmuştur.
