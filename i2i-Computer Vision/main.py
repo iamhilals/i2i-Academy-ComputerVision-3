@@ -42,8 +42,10 @@ while True:
     result = hand_dedector.process(rgb_kare)
     
     if result.multi_hand_landmarks:
+        genel_toplam = 0
+
         for el_bilgisi, el_landmarks in zip(result.multi_handedness, result.multi_hand_landmarks):
-            mp_drawing.draw_landmarks(kare, el_landmarks, mp_hands.HAND_CONNECTIONS) # İskeleti ekrana çizdirme
+            mp_drawing.draw_landmarks(kare, el_landmarks, mp_hands.HAND_CONNECTIONS) # iskeleti ekrana çizdir
             
             el_tarafi = el_bilgisi.classification[0].label
             koordinat_list = []
@@ -77,15 +79,15 @@ while True:
                     
             
             acik_parmak_sayisi = sum(anlik_parmaklar)
-            cv2.putText(kare, f"Parmak: {acik_parmak_sayisi}", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 3)            
+            genel_toplam += acik_parmak_sayisi
                     
            
             if anlik_parmaklar == [0, 1, 0, 0, 1]:
-                kare = cvzone.overlayPNG(kare, img_bozkurt, [50, 50])
+                ekran_genisligi = kare.shape[1]
+                kare = cvzone.overlayPNG(kare, img_bozkurt, [ekran_genisligi-170,20])
                 
            #ses kısmı için parmak durumunu kotnrol etme 
-            if len(anlik_parmaklar) >= 5 and anlik_parmaklar[2] == 0 and anlik_parmaklar[3] == 0 and anlik_parmaklar[4] == 0:
-                
+            if len(anlik_parmaklar) >= 5 and anlik_parmaklar[2] == 0 and anlik_parmaklar[3] == 0 and anlik_parmaklar[4] == 0 and anlik_parmaklar != [0, 0, 0, 0, 0]:                
                  
                 x1, y1 = koordinat_list[4][1], koordinat_list[4][2] # başparmak-> 4
                 x2, y2 = koordinat_list[8][1], koordinat_list[8][2] # işaret Parmağı-> 8
@@ -95,18 +97,19 @@ while True:
                 
                 # mesafeyi ölç ve sesi ayarla
                 mesafe = int(math.hypot(x2 - x1, y2 - y1))
-                ses_seviyesi = np.interp(mesafe, [23, 230], [-65, 0])
-                volume.SetMasterVolumeLevel(ses_seviyesi, None)
+                ses_seviyesi = np.interp(mesafe, [23, 230], [0.0,1.0])
+                volume.SetMasterVolumeLevelScalar(float(ses_seviyesi), None)
                 
                 
                 cv2.putText(kare, f"Mesafe: {mesafe}", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3) # ekrana mesafe bilgisini yazdır
             else:
                 cv2.putText(kare, "Ses Kilidi Kapali", (20, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3) # kilit kapalıysa ekrana kırmızı renkle uyarı yazısı yazdır
                 
-    # Görüntüyü yansıt
+        cv2.putText(kare, f"Toplam Parmak: {genel_toplam}", (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 3)
+
     cv2.imshow("Kamera", kare)
     
-    # 'q' tuşuna basılırsa döngüden çık
+    # 'q' tuşuna basılırsa çık
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
